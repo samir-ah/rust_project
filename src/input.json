@@ -1,0 +1,58 @@
+{
+    "states": [
+        {
+            "is_terminal": false,
+            "is_initial": true,
+            "index": 0
+        },
+        {
+            "is_terminal": false,
+            "is_initial": false,
+            "index": 1
+        },
+        {
+            "is_terminal": true,
+            "is_initial": false,
+            "index": 1
+        }
+    ],
+    "incidence_matrix": [
+        [
+            {
+                "character": "0"
+            },
+            {
+                "character": "a",
+                "max_transit": 2
+            },
+            {
+                "character": "0"
+            }
+        ],
+        [
+            {
+                "character": "0"
+            },
+            {
+                "character": "b",
+                "max_transit": 2
+            },
+            {
+                "character": "c",
+                "max_transit": 2
+            }
+        ],
+        [
+            {
+                "character": "d",
+                "max_transit": 1
+            },
+            {
+                "character": "0"
+            },
+            {
+                "character": "0"
+            }
+        ]
+    ]
+}
