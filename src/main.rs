@@ -9,7 +9,7 @@ use std::path::Path;
 /**
  * represents a state of the automaton
  */
-#[derive(Serialize, Deserialize,Clone,Copy)]
+#[derive(Serialize, Deserialize, Clone, Copy)]
 struct State {
   is_terminal: bool,
   is_initial: bool,
@@ -56,20 +56,7 @@ impl Transition {
     self.current_transit += 1;
   }
 }
-// #[derive(Debug, Clone, Serialize, Deserialize)]
-// struct IncidenceMatrix {
-//   matrix: Vec<Vec<Transition>>,
-// }
-// impl IncidenceMatrix {
-//   fn new(incidence_matrix: Vec<Vec<Transition>>) -> IncidenceMatrix {
-//     IncidenceMatrix {
-//       matrix: incidence_matrix,
-//     }
-//   }
-// }
-/**
- * Generates a list of words from a language represented by an automaton
- */
+
 struct Generator<'a> {
   states: &'a Vec<State>,
 }
@@ -104,30 +91,43 @@ impl Generator<'_> {
   }
 }
 #[derive(Serialize, Deserialize)]
-struct SerializableInputFromFile {
+struct Automaton {
   states: Vec<State>,
   matrix: Vec<Vec<Transition>>,
 }
-impl SerializableInputFromFile {
-  fn new(states: Vec<State>, matrix: Vec<Vec<Transition>>) -> SerializableInputFromFile {
-    SerializableInputFromFile {
+impl Automaton {
+  fn new(states: Vec<State>, matrix: Vec<Vec<Transition>>) -> Automaton {
+    Automaton {
       states: states,
       matrix: matrix,
     }
   }
-  fn serialize_to_json(&self, file_name: &str) {
-    let output = serde_json::to_string(self);
+  fn load_from_json(file_name: &str) -> Automaton {
+    // Create a path to the desired file
+    let path = Path::new(file_name);
+    let display = path.display();
+    // Open the path in read-only mode, returns `io::Result<File>`
+    let mut file = match File::open(&path) {
+      // The `description` method of `io::Error` returns a string that
+      // describes the error
+      Err(why) => panic!("couldn't open {}: {}", display, why.description()),
+      Ok(file) => file,
+    };
+    // Read the file contents into a string, returns `io::Result<usize>`
+    let mut s = String::new();
+    file.read_to_string(&mut s);
+    return serde_json::from_str(s.as_str()).unwrap();
+  }
+  fn save_to_json(&self, file_name: &str) {
+    let output = serde_json::to_string_pretty(self);
     match output {
       Ok(o) => {
-        println!("working with version: {:?}", o);
         let path = Path::new(file_name);
         let display = path.display();
-        // Open a file in write-only mode, returns `io::Result<File>`
         let mut file = match File::create(&path) {
           Err(why) => panic!("couldn't create {}: {}", display, why.description()),
           Ok(file) => file,
         };
-        // Write the `LOREM_IPSUM` string to `file`, returns `io::Result<()>`
         match file.write_all(o.as_bytes()) {
           Err(why) => panic!("couldn't write to {}: {}", display, why.description()),
           Ok(_) => println!("successfully wrote to {}", display),
@@ -142,23 +142,29 @@ impl SerializableInputFromFile {
  * Creation of the incidence matrix and launch of word generation
  */
 fn main() {
-  let mut state1 = State::new(true, false, 0);
-  let mut state2 = State::new(false, false, 1);
-  let mut state3 = State::new(false, true, 2);
+  ///////************création des états**************
+  // let mut state1 = State::new(true, false, 0);
+  // let mut state2 = State::new(false, false, 1);
+  // let mut state3 = State::new(false, true, 2);
+  // let states: Vec<State> = vec![state1, state2, state3];
+  /////// *******création de la matrice d'incidence********
+  // let mut matrix: Vec<Vec<Transition>> = vec![
+  //   vec![Transition::e(), Transition::new("a", 2), Transition::e()],
+  //   vec![
+  //     Transition::e(),
+  //     Transition::new("b", 2),
+  //     Transition::new("c", 2),
+  //   ],
+  //   vec![Transition::new("d", 1), Transition::e(), Transition::e()],
+  // ];
+  //////**********constructeur à partir des variable creés***********
+  //let serializable_input = Automaton::new(states, matrix);
 
-  let states: Vec<State> = vec![state1, state2, state3];
-  let mut matrix: Vec<Vec<Transition>> = vec![
-    vec![Transition::e(), Transition::new("a", 2), Transition::e()],
-    vec![
-      Transition::e(),
-      Transition::new("b", 2),
-      Transition::new("c", 2),
-    ],
-    vec![Transition::new("d", 1), Transition::e(), Transition::e()],
-  ];
-  
+  //////********sauvegarder l'automate dans un fichier au format json**********
+  //serializable_input.save_to_json("output.json");
 
-  let mut serializable_input = SerializableInputFromFile::new(states.clone(), matrix.clone());
+  //////************charger l'automate à partir d'un fichier json**********
+  let serializable_input = Automaton::load_from_json("input.json");
 
   let mut generator = Generator::new(&serializable_input.states);
   let mut words: Vec<String> = vec![];
