@@ -1,0 +1,15 @@
+digraph finite_state_machine {
+  rankdir = LR;
+  node [shape = circle]; 0;
+    node [shape = doublecircle]; 1;
+    node [shape = doublecircle]; 2;
+   node [shape = plaintext];
+  "" -> 0 [label = "start"];
+  node [shape = circle];
+   0->1 [label="a"];
+   1->1 [label="b"];
+   1->2 [label="c"];
+   2->0 [label="d"];
+   2->3 [label="f"];
+   3->2 [label="e"];
+}

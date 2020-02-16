@@ -1,0 +1,36 @@
+{
+  "states":
+  [
+    {"is_terminal":false,"is_initial":true,"index":0},
+    {"is_terminal":true,"is_initial":false,"index":1},
+    {"is_terminal":true,"is_initial":false,"index":2},
+    {"is_terminal":false,"is_initial":false,"index":3}
+  ],
+  "matrix":
+  [
+    [
+      {"character":"0","max_transit":0,"current_transit":0},
+      {"character":"a","max_transit":2,"current_transit":0},
+      {"character":"0","max_transit":0,"current_transit":0},
+      {"character":"0","max_transit":0,"current_transit":0}
+    ],
+    [
+      {"character":"0","max_transit":0,"current_transit":0},
+      {"character":"b","max_transit":2,"current_transit":0},
+      {"character":"c","max_transit":2,"current_transit":0},
+      {"character":"0","max_transit":0,"current_transit":0}
+    ],
+    [
+      {"character":"d","max_transit":1,"current_transit":0},
+      {"character":"0","max_transit":0,"current_transit":0},
+      {"character":"0","max_transit":0,"current_transit":0},
+      {"character":"f","max_transit":1,"current_transit":0}
+    ],
+    [
+      {"character":"0","max_transit":0,"current_transit":0},
+      {"character":"0","max_transit":0,"current_transit":0},
+      {"character":"e","max_transit":1,"current_transit":0},
+      {"character":"0","max_transit":0,"current_transit":0}
+    ]
+  ]
+}
