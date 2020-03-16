@@ -71,13 +71,9 @@ impl Generator<'_> {
     current_word: &str,
     mut incidence_matrix: &mut Vec<Vec<Transition>>,
   ) {
-    //let mut cloned_matrix = self.incidence_matrix.clone();
-    //println!("state: {:?}", state_index+1);
     if self.states[state_index].is_terminal {
       if !words.contains(&String::from(current_word)) {
         words.push(String::from(current_word));
-        //println!("words: {:?}", words);
-        //return;
       }
     };
     for i in 0..incidence_matrix[state_index].len() {
@@ -160,6 +156,7 @@ impl Automaton {
     file.read_to_string(&mut s);
     return serde_json::from_str(s.as_str()).unwrap();
   }
+
   fn save_to_json(&self, file_name: &str) {
     let output = serde_json::to_string(self);
     match output {
@@ -221,29 +218,11 @@ impl Automaton {
  * Creation of the incidence matrix and launch of word generation
  */
 fn main() {
-  ///////************création des états**************
-  // let mut state1 = State::new(true, false, 0);
-  // let mut state2 = State::new(false, false, 1);
-  // let mut state3 = State::new(false, true, 2);
-  // let states: Vec<State> = vec![state1, state2, state3];
-  /////// *******création de la matrice d'incidence********
-  // let mut matrix: Vec<Vec<Transition>> = vec![
-  //   vec![Transition::e(), Transition::new("a", 2), Transition::e()],
-  //   vec![
-  //     Transition::e(),
-  //     Transition::new("b", 2),
-  //     Transition::new("c", 2),
-  //   ],
-  //   vec![Transition::new("d", 1), Transition::e(), Transition::e()],
-  // ];
-  //////**********constructeur à partir des variable creés***********
-  //let serializable_input = Automaton::new(states, matrix);
-  //////********sauvegarder l'automate dans un fichier au format json**********
-  //serializable_input.save_to_json("output.json");
-
-
   //////************charger l'automate à partir d'un fichier json**********
   let mut serializable_input = Automaton::load_from_json("input.json");
+
+//////********sauvegarder l'automate dans un fichier au format json**********
+  //serializable_input.save_to_json("output.json");
 
   serializable_input.save_to_dot_script("dotScript.txt");
 
