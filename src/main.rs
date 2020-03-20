@@ -12,7 +12,6 @@ use std::path::Path;
 #[derive(Serialize, Deserialize, Clone, Copy)]
 struct State {
   is_terminal: bool,
-  is_initial: bool,
   index: usize,
 }
 /**
@@ -21,7 +20,6 @@ struct State {
 impl State {
   fn new(is_initial: bool, is_terminal: bool, index: usize) -> State {
     State {
-      is_initial: is_initial,
       is_terminal: is_terminal,
       index: index,
     }
@@ -32,28 +30,19 @@ impl State {
  */
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct Transition {
-  character: String,
-  max_transit: usize,
-  current_transit: usize,
+  character: String
 }
 
 impl Transition {
-  fn new(character: &str, max_transit: usize) -> Transition {
+  fn new(character: &str) -> Transition {
     Transition {
-      character: String::from(character),
-      max_transit: max_transit,
-      current_transit: 0,
+      character: String::from(character)
     }
   }
   fn e() -> Transition {
     Transition {
       character: String::from("0"),
-      max_transit: 0,
-      current_transit: 0,
     }
-  }
-  fn increment_current_transit(&mut self) {
-    self.current_transit += 1;
   }
 }
 
@@ -70,6 +59,7 @@ impl Generator<'_> {
     state_index: usize,
     current_word: &str,
     mut incidence_matrix: &mut Vec<Vec<Transition>>,
+    max_word_length:usize
   ) {
     if self.states[state_index].is_terminal {
       if !words.contains(&String::from(current_word)) {
@@ -78,10 +68,10 @@ impl Generator<'_> {
     };
     for i in 0..incidence_matrix[state_index].len() {
       let mut t = &mut incidence_matrix[state_index][i];
-      if t.current_transit < t.max_transit {
-        t.increment_current_transit();
+      // if t.current_transit < t.max_transit {
+      if  t.character != "0" && current_word.len() < 7 {
         let together = format!("{}{}", current_word, t.character);
-        self.list_all_words(words, i, together.as_str(), &mut incidence_matrix.clone());
+        self.list_all_words(words, i, together.as_str(), &mut incidence_matrix.clone(),max_word_length);
       }
     }
   }
@@ -126,6 +116,45 @@ impl Generator<'_> {
       }
     }
     return false;
+  }
+
+  fn union(
+    &mut self,
+    words_union: &mut Vec<String>,
+    mut incidence_matrix: &mut Vec<Vec<Transition>>,
+    mut incidence_matrix_2: &mut Vec<Vec<Transition>>,
+    max_word_length:usize
+  ) {
+    let mut words_1: Vec<String> = vec![];
+    self.list_all_words(&mut words_1,0,"",&mut incidence_matrix,max_word_length);
+    let mut words_2: Vec<String> = vec![];
+    self.list_all_words(&mut words_2,0,"",&mut incidence_matrix_2,max_word_length);
+
+    words_union.append(&mut words_1);
+    words_union.append(&mut words_2);
+    
+  }
+
+  fn inter(
+    &mut self,
+    words_inter: &mut Vec<String>,
+    mut incidence_matrix: &mut Vec<Vec<Transition>>,
+    mut incidence_matrix_2: &mut Vec<Vec<Transition>>,
+    max_word_length:usize
+  ) {
+    let mut words_1: Vec<String> = vec![];
+    self.list_all_words(&mut words_1,0,"",&mut incidence_matrix,max_word_length);
+    let mut words_2: Vec<String> = vec![];
+    self.list_all_words(&mut words_2,0,"",&mut incidence_matrix_2,max_word_length);
+
+    for i_word in &words_1 {
+      for j_word in &words_2 {
+        if i_word == j_word {
+          words_inter.push(i_word.clone());
+        }
+      }
+    }
+    
   }
 }
 #[derive(Serialize, Deserialize)]
@@ -220,6 +249,7 @@ impl Automaton {
 fn main() {
   //////************charger l'automate à partir d'un fichier json**********
   let mut serializable_input = Automaton::load_from_json("input.json");
+  let mut serializable_input_2 = Automaton::load_from_json("input2.json");
 
 //////********sauvegarder l'automate dans un fichier au format json**********
   //serializable_input.save_to_json("output.json");
@@ -228,11 +258,16 @@ fn main() {
 
   let mut generator = Generator::new(&serializable_input.states);
   let mut words: Vec<String> = vec![];
-  generator.list_all_words(&mut words, 0, "", &mut serializable_input.matrix);
-  println!("words: {:?}", words);
+  generator.union(&mut words,&mut serializable_input.matrix,&mut serializable_input_2.matrix,6);
+  println!("words union: {:?}", words);
+
+  words = vec![];
+
+  generator.inter(&mut words,&mut serializable_input.matrix,&mut serializable_input_2.matrix,6);
+  println!("words inter: {:?}", words);
 
   let mut path_in_automaton: Vec<usize> = vec![];
-  let wanted_word = "acda";
+  let wanted_word = "abc";
   if generator.match_word_path(
     wanted_word,
     0,
