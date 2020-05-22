@@ -53,28 +53,34 @@ impl Generator<'_> {
   fn new(states: &'_ Vec<State>) -> Generator {
     Generator { states: states }
   }
-  fn list_all_words(
-    &mut self,
-    words: &mut Vec<String>,
-    state_index: usize,
-    current_word: &str,
-    mut incidence_matrix: &mut Vec<Vec<Transition>>,
-    max_word_length:usize
-  ) {
-    if self.states[state_index].is_terminal {
-      if !words.contains(&String::from(current_word)) {
-        words.push(String::from(current_word));
-      }
-    };
-    for i in 0..incidence_matrix[state_index].len() {
-      let mut t = &mut incidence_matrix[state_index][i];
-      // if t.current_transit < t.max_transit {
-      if  t.character != "0" && current_word.len() < 7 {
-        let together = format!("{}{}", current_word, t.character);
-        self.list_all_words(words, i, together.as_str(), &mut incidence_matrix.clone(),max_word_length);
-      }
+// fonction recursive 
+fn list_all_words(
+  &mut self,
+  words: &mut Vec<String>,
+  state_index: usize,
+  current_word: &str,
+  mut incidence_matrix: &mut Vec<Vec<Transition>>,
+  max_word_length:usize
+) {
+  // Si c'est un état terminal 
+  if self.states[state_index].is_terminal {
+      // si le mot courant n'est pas dans la liste
+    if !words.contains(&String::from(current_word)) {
+      // ajouter le mot courant dans la liste
+      words.push(String::from(current_word));
+    }
+  };
+  // On parcourt les transitions de l'état courant
+  for i in 0..incidence_matrix[state_index].len() {
+    let mut t = &mut incidence_matrix[state_index][i];
+    // s'il existe une transition et la limite de la longueur du mot n'est pas atteinte
+    if  t.character != "0" && current_word.len() < max_word_length {
+      let together = format!("{}{}", current_word, t.character);
+      // appel récursive, i correspond à l'état suivant
+      self.list_all_words(words, i, together.as_str(), &mut incidence_matrix.clone(),max_word_length);
     }
   }
+}
 
   fn match_word_path(
     &mut self,
@@ -85,23 +91,31 @@ impl Generator<'_> {
     incidence_matrix: &Vec<Vec<Transition>>,
     path_in_automaton: &mut Vec<usize>,
   ) -> bool {
+    //si premier état et premier char
     if state_index == 0 && char_index == 0 {
+      //ajouter l'état courant dans le chemin
       path_in_automaton.push(state_index)
     }
+    // si l'état est terminal et que le mot courant correspond au mot recherché
+    //condition d'arrêt
     if self.states[state_index].is_terminal && (word.len() == current_word.len()) {
       if current_word == word {
         return true;
       }
     };
+    //Parcourir la liste des trasitions 
     for index_next_state in 0..incidence_matrix[state_index].len() {
       let t = &incidence_matrix[state_index][index_next_state];
+      //si la transition existe
       if t.character != "0" {
+        // ajouter le char au mot courant
         let new_current_word = format!("{}{}", current_word, t.character);
+        //si le mot recherché et le mot courant ont le même char i commun
         if word.get(char_index..char_index + 1)
           == new_current_word.as_str().get(char_index..char_index + 1)
         {
           path_in_automaton.push(index_next_state);
-
+          // condition d'arrêt, et appel récursif
           if (self.match_word_path(
             word,
             char_index + 1,
